@@ -1,0 +1,182 @@
+The repo contains four files 
+tcam_ex.c , list_api.c , list_api.h and a makefile
+
+Actual API implenetaion is in tcam_ex.c files 
+List_api.c and list_api.h are library files which contains list API's which I used in building tcam_insert and tcam_remove functions
+
+  >>>>>> To build <<<<<<<
+   make
+ 
+the above makefile build a tcam exe 
+
+  >>> to execute <<<<<<<
+  ./tcam  
+
+
+Assumptions :
+  I assumed that IDs are Unique and monotonically increasing in the batch ,
+  added a commnet in the code on how to handle the case if the ID's are not   unique
+
+Design Considerations :
+ Mmaintaining a linked list , which keeps track of free entries which we can use  for inserting entries which satisfies priority vs location rules . This  will give the free index in constant time and better performance compared to sorting the elements
+
+   
+
+>>>>>>> Sample output <<<<<<<
+
+SALLUVAD-M-QRQG:TCAM_SUB salluvad$ make
+gcc -c -o tcam_ex.o tcam_ex.c -I.
+gcc -o tcam -std=c99 tcam_ex.o list_api.o
+
+
+SALLUVAD-M-QRQG:TCAM_SUB salluvad$ ./tcam
+
+ID: 1, Priority: 100
+ID: 2, Priority: 200
+ID: 3, Priority: 300
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+total HW access after batch 1 3
+
+after 2 batches TCAM entries:
+ID: 4, Priority: 100
+ID: 1, Priority: 100
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+
+total HW access  12
+
+after remove ID 4:
+ID: 0, Priority: 0
+ID: 1, Priority: 100
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+FREE LOC: 0
+ FREE LOC: 0
+
+after batch 3 : TCAM entries :
+ID: 0, Priority: 0
+ID: 1, Priority: 100
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 8, Priority: 300
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 7, Priority: 500
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+FREE LOC: 0
+
+ after batch 4 :TCAM entries:
+ID: 10, Priority: 100
+ID: 1, Priority: 100
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 8, Priority: 300
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 7, Priority: 500
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+
+
+ after batch 5 :TCAM entries:
+ID: 12, Priority: 100
+ID: 10, Priority: 100
+ID: 1, Priority: 100
+ID: 13, Priority: 200
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 8, Priority: 300
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 7, Priority: 500
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+
+ after remove ID 13:
+ID: 12, Priority: 100
+ID: 10, Priority: 100
+ID: 1, Priority: 100
+ID: 0, Priority: 0
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 8, Priority: 300
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 7, Priority: 500
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+FREE LOC: 3
+
+ after batch 6 :TCAM entries:
+ID: 12, Priority: 100
+ID: 10, Priority: 100
+ID: 1, Priority: 100
+ID: 13, Priority: 200
+ID: 5, Priority: 200
+ID: 2, Priority: 200
+ID: 8, Priority: 300
+ID: 6, Priority: 300
+ID: 3, Priority: 300
+ID: 7, Priority: 500
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+ID: 0, Priority: 0
+
+
+Priority and location rules are met: Yes
+total HW access  35
+
+
+
