@@ -4,21 +4,29 @@ tcam_ex.c , list_api.c , list_api.h and a makefile
 Actual API implenetaion is in tcam_ex.c files 
 List_api.c and list_api.h are library files which contains list API's which I used in building tcam_insert and tcam_remove functions
 
-  >>>>>> To build <<<<<<<
+Queue.c and Queue.h has library APIS for queue. 
+
+ >>>>>> To build <<<<<<<
    make
  
 the above makefile build a tcam exe 
 
-  >>> to execute <<<<<<<
+>>> to execute <<<<<<<
   ./tcam  
 
 
 Assumptions :
-  I assumed that IDs are Unique and monotonically increasing in the batch ,
-  added a commnet in the code on how to handle the case if the ID's are not   unique
+1.  I assumed that IDs are Unique , Zero is Invalid ID
+ `  added a commnet in the code on how to handle the case if the ID's are not unique
+
+2. For ease of display and brevity I took TCAM size as 12 instead of 2048
 
 Design Considerations :
- Maintaining a linked list , which keeps track of free entries which we can use  for inserting entries which satisfies priority vs location rules . This  will give the free index in constant time and better performance compared to sorting the elements
+
+1. Maintaining a linked list , which keeps track of free entries which we can use  for inserting entries which satisfies priority vs location rules . This  will give the free index in constant time and better performance compared to sorting the elements
+
+2.When TCAM is full , need to remove older entries , I'm maintaining a queue and enque when an element is added and delete when element is removed . 
+
 
 >>>> TEST CASES COVERED <<<<<<
 TEST CASE 0 : Invalid Args
@@ -34,22 +42,22 @@ TEST CASE 8 : Add another batch of same priorities
 TEST CASE 9 : Remove element from middle of TCAM
 TEST CASE 10 : Negative test : Add entry with ID 0
 TEST CASE 11 : Add elements including one with  highest priority Zero
-TEST CASE 12 : TCAM FULL
+TEST CASE 12 : TCAM FULL: Removing Older entries and adding Newer entries 
 TEST CASE 13 : Remove a non existing element with ID 50
-TEST CASE 14 : Reset TCAM
-TEST CASE 15 : Sending batch larger than Max Batch size
-TEST CASE 16 : Inserting after TCAM RESET
+TEST CASE 14 : Validate TCAM
+TEST CASE 15 : Reset TCAM
+TEST CASE 16 : Sending batch larger than Max Batch size
+TEST CASE 17 : Inserting after TCAM RESET
    
 
 >>>>>>> Sample output <<<<<<<
 
-SALLUVAD-M-QRQG:TCAM_SUB salluvad$ make
+SALLUVAD-M-QRQG:TCAM_SUB_2 salluvad$ make
 gcc -c -o tcam_ex.o tcam_ex.c -I.
 gcc -o tcam -std=c99 tcam_ex.o list_api.o
 
 
-
-SALLUVAD-M-QRQG:TCAM_SUB salluvad$ ./tcam
+SALLUVAD-M-QRQG:TCAM_SUB_2 salluvad$ ./tcam
 
 
 TEST CASE 0 : Invalid Args
@@ -71,13 +79,13 @@ Tcam Remove  failed
 
 TEST CASE 4: Insert entries with unique priorities
 Inserting batch 1  TCAM entries:
+Enqueued element: 1
+Enqueued element: 2
+Enqueued element: 3
 Tcam Contents
 ID: 1, Priority: 100
 ID: 2, Priority: 200
 ID: 3, Priority: 300
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
@@ -93,6 +101,9 @@ total HW access after batch 1 3
 TEST CASE 5: Insert entries with  same priorities which alredy exist in TCAM
 
 Inserting  batch 2 TCAM entries:
+Enqueued element: 4
+Enqueued element: 5
+Enqueued element: 6
 Tcam Contents
 ID: 4, Priority: 100
 ID: 1, Priority: 100
@@ -106,14 +117,12 @@ ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 total HW access  12
 
 
 TEST CASE 6: Remove an element
 remove ID 4:
+Deleted node with value: 4
 Tcam Contents
 ID: 0, Priority: 0
 ID: 1, Priority: 100
@@ -127,13 +136,12 @@ ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
 TEST CASE 6: Add another batch of unique and same priorities
 Inserting batch 3 : TCAM entries :
+Enqueued element: 7
+Enqueued element: 8
 Tcam Contents
 ID: 0, Priority: 0
 ID: 1, Priority: 100
@@ -147,12 +155,10 @@ ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
 TEST CASE 7: Add another batch of same priorities of smallest batch size 1
+Enqueued element: 10
 Inserting batch 4 :TCAM entries:
 Tcam Contents
 ID: 10, Priority: 100
@@ -167,13 +173,12 @@ ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
 TEST CASE 8: Add another batch of same priorities
 Inserting batch 5 :TCAM entries:
+Enqueued element: 12
+Enqueued element: 13
 Tcam Contents
 ID: 12, Priority: 100
 ID: 10, Priority: 100
@@ -187,13 +192,11 @@ ID: 3, Priority: 300
 ID: 7, Priority: 500
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
 TEST CASE 9: Remove element from middle of TCAM
 remove ID 13:
+Deleted node with value: 13
 Tcam Contents
 ID: 12, Priority: 100
 ID: 10, Priority: 100
@@ -205,9 +208,6 @@ ID: 8, Priority: 300
 ID: 6, Priority: 300
 ID: 3, Priority: 300
 ID: 7, Priority: 500
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 
@@ -228,13 +228,13 @@ ID: 3, Priority: 300
 ID: 7, Priority: 500
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
 TEST CASE 11 : Add elements including one with  highest priority Zero
 inserting batch 7 :TCAM entries:
+Enqueued element: 13
+Enqueued element: 15
+Enqueued element: 17
 Tcam Contents
 ID: 17, Priority: 0
 ID: 12, Priority: 100
@@ -248,16 +248,12 @@ ID: 8, Priority: 300
 ID: 6, Priority: 300
 ID: 3, Priority: 300
 ID: 7, Priority: 500
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
-TEST CASE 12 : TCAM FULL
+TEST CASE 12 : TCAM FULL: Removing Older entries and adding Newer entries
  inserting batch 8 :TCAM entries:
-
-TCAM FULL
- Tcam Insert failed
+Enqueued element: 18
+Enqueued element: 19
 
 
 TEST CASE 13 : Remove a non existing element with ID 50
@@ -266,23 +262,24 @@ Tcam Contents
 ID: 17, Priority: 0
 ID: 12, Priority: 100
 ID: 10, Priority: 100
-ID: 1, Priority: 100
+ID: 19, Priority: 200
+ID: 18, Priority: 200
 ID: 15, Priority: 200
 ID: 13, Priority: 200
 ID: 5, Priority: 200
-ID: 2, Priority: 200
 ID: 8, Priority: 300
 ID: 6, Priority: 300
 ID: 3, Priority: 300
 ID: 7, Priority: 500
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
+
+
+TEST CASE 14 : Validate TCAM
+
 Priority and location rules are met: Yes
-total HW access  55
+total HW access  61
 
 
-TEST CASE 14 Reset TCAM
+TEST CASE 15 Reset TCAM
 Tcam Contents
 ID: 0, Priority: 0
 ID: 0, Priority: 0
@@ -296,24 +293,19 @@ ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 
 
-TEST CASE 15 Sending batch larger than Max Batch size
+TEST CASE 16 Sending batch larger than Max Batch size
 
  Batch Size Exceeded
 
 
-TEST CASE 16 : Inserting after TCAM RESET
+TEST CASE 17 : Inserting after TCAM RESET
+Enqueued element: 13
+Enqueued element: 11
 Tcam Contents
 ID: 13, Priority: 200
 ID: 11, Priority: 400
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
-ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
 ID: 0, Priority: 0
